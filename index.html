@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIET Aspirasys Pro | Enterprise Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           1. CSS VARIABLES & THEME
+           ========================================= */
+        :root {
+            --brand-primary: #4F46E5;
+            --brand-primary-hover: #4338CA;
+            --brand-surface: #EEF2FF;
+            --bg-body: #F1F5F9;
+            --bg-surface: #FFFFFF;
+            --bg-sidebar: #0F172A;
+            --bg-input: #FFFFFF;
+            --text-main: #1E293B;
+            --text-secondary: #64748B;
+            --text-inverted: #FFFFFF;
+            --border-color: #E2E8F0;
+            --color-success: #10B981; --bg-success: #D1FAE5;
+            --color-warning: #F59E0B; --bg-warning: #FEF3C7;
+            --color-error: #EF4444; --bg-error: #FEE2E2;
+            --color-info: #3B82F6; --bg-info: #DBEAFE;
+            --sidebar-width: 260px;
+            --header-height: 64px;
+            --radius-md: 8px; --radius-lg: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --brand-primary: #6366F1;
+            --brand-surface: #1E1B4B;
+            --bg-body: #0F172A;
+            --bg-surface: #1E293B;
+            --bg-sidebar: #020617;
+            --bg-input: #0F172A;
+            --text-main: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --border-color: #334155;
+            --bg-success: #064E3B;
+            --bg-warning: #78350F;
+            --bg-error: #7F1D1D;
+            --color-info: #60A5FA; --bg-info: #1E3A8A;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); font-size: 15px; line-height: 1.6; overflow: hidden; transition: background-color 0.3s ease; }
+        a { text-decoration: none; color: inherit; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+        input, select, textarea { font-family: inherit; }
+        .hidden { display: none !important; }
+
+        /* UI COMPONENTS */
+        .icon { width: 20px; height: 20px; stroke-width: 2; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--brand-primary); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius-md); font-weight: 600; transition: all 0.2s; white-space: nowrap; font-size: 0.9rem; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background-color: var(--brand-primary); color: var(--text-inverted); }
+        .btn-secondary { border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-secondary:hover { background-color: var(--bg-body); }
+        .btn-danger { background-color: var(--bg-error); color: var(--color-error); }
+        .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge.success { background: var(--bg-success); color: var(--color-success); }
+        .badge.warning { background: var(--bg-warning); color: var(--color-warning); }
+        .badge.info { background: var(--bg-info); color: var(--color-info); }
+        .badge.brand { background: var(--brand-surface); color: var(--brand-primary); }
+        .form-input { width: 100%; padding: 12px 16px; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-input); color: var(--text-main); }
+        .form-input:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+        /* LAYOUT */
+        #app-layout { display: flex; height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); color: #94A3B8; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); transition: transform 0.3s ease; z-index: 50; }
+        .sidebar-header { height: var(--header-height); display: flex; align-items: center; padding: 0 24px; font-size: 1.25rem; font-weight: 700; color: #F8FAFC; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-links { flex: 1; padding: 24px 16px; overflow-y: auto; }
+        .nav-item { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 4px; border-radius: var(--radius-md); color: inherit; cursor: pointer; transition: all 0.2s; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: #FFF; transform: translateX(4px); }
+        .nav-item.active { background: var(--brand-primary); color: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .user-mini { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--brand-primary), #818CF8); color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .top-header { height: var(--header-height); background: var(--bg-surface); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
+        .content-area { flex: 1; overflow-y: auto; padding: 32px; }
+        .grid-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .stat-value { font-size: 2.5rem; font-weight: 800; color: var(--text-main); line-height: 1.2; margin: 8px 0; }
+        .stat-label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* AUTH & MODALS */
+        #auth-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-body); z-index: 1000; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(var(--border-color) 1px, transparent 1px); background-size: 24px 24px; }
+        .auth-card { width: 100%; max-width: 400px; background: var(--bg-surface); padding: 40px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border-color); animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--bg-surface); padding: 16px 20px; border-radius: var(--radius-md); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-left: 4px solid var(--brand-primary); color: var(--text-main); display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; min-width: 300px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: var(--bg-surface); width: 90%; max-width: 600px; padding: 32px; border-radius: 16px; transform: scale(0.95) translateY(10px); transition: transform 0.3s; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+
+        /* ANIMATIONS */
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .stagger-item { opacity: 0; animation: fadeUp 0.5s ease-out forwards; }
+        .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .menu-toggle-btn { display: none; font-size: 1.5rem; }
+        @media (max-width: 1024px) { .sidebar { position: absolute; height: 100%; transform: translateX(-100%); z-index: 100; box-shadow: 10px 0 20px rgba(0,0,0,0.2); } .sidebar.open { transform: translateX(0); } .menu-toggle-btn { display: block; } .content-area { padding: 20px; } }
+    </style>
+</head>
+<body>
+
+    <!-- UTILS -->
+    <div id="toast-container"></div>
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+
+    <!-- AUTH SCREEN -->
+    <main id="auth-view">
+        <div class="auth-card">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size:3rem; margin-bottom:10px;">🚀</div>
+                <h1 style="color: var(--brand-primary); font-size: 1.8rem; font-weight:800;">TIET Aspirasys Pro</h1>
+                <p style="color: var(--text-secondary);">Enterprise Workspace</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="student@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" id="login-btn" class="btn btn-primary" style="width:100%;">Access Dashboard</button>
+            </form>
+            <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--text-secondary);">Secure SSO Login</p>
+        </div>
+    </main>
+
+    <!-- MAIN APP -->
+    <div id="app-layout" class="hidden">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div style="flex:1;">TIET Aspirasys <span style="opacity:0.7;">Pro</span></div>
+                <button id="sidebar-close" class="menu-toggle-btn" style="color:white; background:none; border:none;">&times;</button>
+            </div>
+            <nav class="nav-links">
+                <div class="nav-item active" data-link="dashboard"><span style="margin-right:12px;">📊</span> Dashboard</div>
+                <div class="nav-item" data-link="my-courses"><span style="margin-right:12px;">📚</span> Learning Path</div>
+                <div class="nav-item" data-link="my-projects"><span style="margin-right:12px;">💻</span> Projects</div>
+                <div class="nav-item" data-link="my-timesheets"><span style="margin-right:12px;">⏱️</span> Timesheets</div>
+                <div class="nav-item" data-link="my-interviews"><span style="margin-right:12px;">🤝</span> Interviews</div>
+                <div class="nav-item" data-link="announcements"><span style="margin-right:12px;">📢</span> Notices</div>
+                <div class="nav-item" data-link="achievements"><span style="margin-right:12px;">🏆</span> Achievements</div>
+                <div class="nav-item" data-link="daily-goals"><span style="margin-right:12px;">🎯</span> Daily Goals</div>
+                <div class="nav-item" data-link="my-profile"><span style="margin-right:12px;">⚙️</span> Profile</div>
+            </nav>
+            <div class="user-mini">
+                <div id="sidebar-avatar" class="user-avatar">JD</div>
+                <div style="flex:1;">
+                    <div id="sidebar-name" style="color:white; font-weight:600;">John Doe</div>
+                    <div style="color:#94A3B8; font-size:0.8rem;">Frontend Intern</div>
+                </div>
+                <button id="logout-btn" style="color:#F87171; background:none; border:none; font-size:1.2rem;">⏻</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button id="menu-toggle" class="menu-toggle-btn btn-secondary" style="padding:4px 8px;">☰</button>
+                    <h2 id="page-title" style="font-size:1.2rem; font-weight:700;">Dashboard</h2>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <button id="theme-btn" class="btn-secondary" style="border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;">🌙</button>
+                    <span class="badge brand">v3.0 Live</span>
+                </div>
+            </header>
+            <div id="content-area" class="content-area"></div>
+        </main>
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        // --- 1. APP STATE & DATA STORE ---
+        const App = {
+            state: {
+                theme: localStorage.getItem('ios_theme') || 'light',
+                user: JSON.parse(localStorage.getItem('ios_user')) || null,
+                currentPage: 'dashboard',
+                
+                // Real Data
+                projects: JSON.parse(localStorage.getItem('ios_projects')) || [
+                    { id: 1, name: 'SaaS Analytics', stack: 'React', status: 'In Review' },
+                    { id: 2, name: 'API Gateway', stack: 'NodeJS', status: 'Active' }
+                ],
+                goals: JSON.parse(localStorage.getItem('ios_goals')) || [
+                    { id: 1, text: 'Fix navigation bug', completed: false }
+                ],
+                timesheets: JSON.parse(localStorage.getItem('ios_timesheets')) || [
+                    { id: 1, date: '2023-10-24', task: 'UI Design', hours: 5 }
+                ],
+                courses: JSON.parse(localStorage.getItem('ios_courses')) || [
+                    { id: 1, title: 'Advanced React Patterns', progress: 60, modules: 12, instructor: 'Kent C. Dodds', topics: ['Hooks', 'Context', 'Performance'] },
+                    { id: 2, title: 'System Design for Juniors', progress: 20, modules: 8, instructor: 'Alex Xu', topics: ['Load Balancing', 'Caching', 'Databases'] }
+                ],
+                interviews: JSON.parse(localStorage.getItem('ios_interviews')) || [
+                    { id: 1, company: 'Google', role: 'UX Intern', date: '2023-11-15', status: 'Scheduled' },
+                    { id: 2, company: 'Microsoft', role: 'Frontend Dev', date: '2023-10-10', status: 'Passed' }
+                ],
+                announcements: [
+                    { id: 1, title: 'Winter Break Schedule', date: '2023-12-01', content: 'Office will remain closed from Dec 24th to Jan 1st.' },
+                    { id: 2, title: 'System Maintenance', date: '2023-11-20', content: 'Server downtime expected this Saturday from 2 AM to 4 AM.' }
+                ],
+                achievements: JSON.parse(localStorage.getItem('ios_achievements')) || [
+                    { id: 1, title: 'Top Performer', date: '2023-10-01', description: 'Awarded for consistent high-quality code delivery.' },
+                    { id: 2, title: 'Bug Squash', date: '2023-11-15', description: 'Fixed 10 critical bugs in the hackathon.' }
+                ]
+            },
+
+            icons: {
+                moon: `<svg class="icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+                sun: `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
+            },
+
+            // --- 2. INITIALIZATION ---
+            init() {
+                this.applyTheme();
+                this.bindEvents();
+                this.checkAuth();
+            },
+
+            saveData() {
+                localStorage.setItem('ios_projects', JSON.stringify(this.state.projects));
+                localStorage.setItem('ios_goals', JSON.stringify(this.state.goals));
+                localStorage.setItem('ios_timesheets', JSON.stringify(this.state.timesheets));
+                localStorage.setItem('ios_courses', JSON.stringify(this.state.courses));
+                localStorage.setItem('ios_interviews', JSON.stringify(this.state.interviews));
+                localStorage.setItem('ios_achievements', JSON.stringify(this.state.achievements));
+                
+                // Re-render current page to show changes
+                this.navigate(this.state.currentPage); 
+            },
+
+            // --- 3. VIEW GENERATORS ---
+            renderViews(page) {
+                const { projects, goals, timesheets, user, courses, interviews, announcements, achievements } = this.state;
+
+                switch(page) {
+                    case 'dashboard':
+                        const pendingTasks = goals.filter(g => !g.completed).length;
+                        return `
+                            <div class="grid-dashboard">
+                                <div class="card stagger-item">
+                                    <div class="stat-label">Monthly Goal</div>
+                                    <div style="display:flex; align-items:baseline; gap:10px;">
+                                        <div class="stat-value" style="color: var(--color-success);">82%</div>
+                                        <span class="badge success" style="font-size:0.7rem;">▲ 12% Improved</span>
+                                    </div>
+                                    <div style="background:var(--bg-body); height:6px; border-radius:4px; margin-top:8px; overflow:hidden;">
+                                        <div style="width:82%; background:var(--color-success); height:100%;"></div>
+                                    </div>
+                                </div>
+                                <div class="card stagger-item" style="animation-delay: 0.1s;">
+                                    <div class="stat-label">Pending Tasks</div>
+                                    <div class="stat-value" style="color: var(--color-warning);">${pendingTasks}</div>
+                                    <div class="text-secondary" style="font-size:0.85rem;">Needs Attention</div>
+                                </div>
+                                <div class="card stagger-item" style="animation-delay: 0.2s;">
+                                    <div class="stat-label">Active Projects</div>
+                                    <div class="stat-value" style="color: var(--brand-primary);">${projects.length}</div>
+                                    <div class="text-secondary" style="font-size:0.85rem;">In Development</div>
+                                </div>
+                            </div>`;
+
+                    case 'achievements':
+                        return `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                                <h3 style="font-weight:700;">My Achievements</h3>
+                                <button class="btn btn-primary" onclick="App.openAddAchievementModal()">+ Add New</button>
+                            </div>
+                            <div class="grid-dashboard">
+                                ${achievements.map((a, idx) => `
+                                    <div class="card stagger-item" style="animation-delay:${idx * 0.1}s; text-align:center;">
+                                        <div style="font-size:2.5rem; margin-bottom:10px;">🏆</div>
+                                        <h3 style="font-weight:700;">${a.title}</h3>
+                                        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:10px;">${a.date}</p>
+                                        <p style="margin-bottom:15px; line-height:1.5;">${a.description}</p>
+                                        <button class="btn btn-danger" onclick="App.deleteAchievement(${a.id})" style="width:100%;">Remove</button>
+                                    </div>
+                                `).join('')}
+                            </div>`;
+
+                    case 'my-interviews':
+                        const attendedCount = interviews.filter(i => i.status === 'Passed' || i.status === 'Completed').length;
+                        const upcomingCount = interviews.filter(i => i.status === 'Scheduled').length;
+                        return `
+                            <div class="grid-dashboard">
+                                <div class="card stagger-item">
+                                    <div class="stat-label">Attended</div>
+                                    <div class="stat-value" style="color:var(--brand-primary);">${attendedCount}</div>
+                                </div>
+                                <div class="card stagger-item" style="animation-delay:0.1s;">
+                                    <div class="stat-label">Upcoming</div>
+                                    <div class="stat-value" style="color:var(--color-warning);">${upcomingCount}</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin:30px 0 20px;">
+                                <h3 style="font-weight:700;">Interview Schedule</h3>
+                                <button class="btn btn-primary" onclick="App.openAddInterviewModal()">+ Schedule New</button>
+                            </div>
+                            <div class="grid-dashboard" style="grid-template-columns: 1fr;">
+                                ${interviews.map(i => `
+                                    <div class="card stagger-item" style="border-left:4px solid ${i.status === 'Scheduled' ? 'var(--color-warning)' : 'var(--color-success)'};">
+                                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                            <div>
+                                                <h3 style="font-weight:700;">${i.company}</h3>
+                                                <p style="color:var(--text-secondary); margin-top:5px;">${i.role}</p>
+                                                <p style="font-weight:600; margin-top:10px;">${i.date}</p>
+                                            </div>
+                                            <span class="badge ${i.status === 'Scheduled' ? 'warning' : 'success'}">${i.status}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>`;
+
+                    case 'announcements':
+                        return `
+                            <div class="grid-dashboard" style="grid-template-columns: 1fr;">
+                                <h3 style="font-weight:700; margin-bottom:10px;">📢 Latest Notices</h3>
+                                ${announcements.map((a, idx) => `
+                                    <div class="card stagger-item" style="animation-delay:${idx * 0.1}s">
+                                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                            <strong style="font-size:1.1rem; color:var(--brand-primary);">${a.title}</strong>
+                                            <span style="color:var(--text-secondary); font-size:0.85rem;">${a.date}</span>
+                                        </div>
+                                        <p style="color:var(--text-main); line-height:1.6;">${a.content}</p>
+                                    </div>
+                                `).join('')}
+                            </div>`;
+
+                    case 'my-projects':
+                        return `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                                <p class="text-secondary">Manage your ongoing work.</p>
+                                <button class="btn btn-primary" onclick="App.openAddProjectModal()">+ New Project</button>
+                            </div>
+                            <div class="grid-dashboard" style="grid-template-columns: 1fr;">
+                                ${projects.map(p => `
+                                    <div class="card stagger-item" style="display:flex; justify-content:space-between; align-items:center;">
+                                        <div>
+                                            <h3 style="font-weight:700;">${p.name}</h3>
+                                            <span class="badge brand" style="margin-top:5px;">${p.stack}</span>
+                                        </div>
+                                        <div style="display:flex; gap:10px; align-items:center;">
+                                            <span class="badge ${p.status === 'Active' ? 'success' : 'warning'}">${p.status}</span>
+                                            <button class="btn btn-danger" style="padding:6px 10px;" onclick="App.deleteProject(${p.id})">Delete</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>`;
+
+                    case 'my-courses':
+                        return `
+                            <div class="grid-dashboard">
+                                ${courses.map(c => `
+                                    <div class="card stagger-item">
+                                        <h3 style="font-weight:700; margin-bottom:5px;">${c.title}</h3>
+                                        <div style="background:var(--bg-body); height:8px; border-radius:4px; margin:10px 0; overflow:hidden;">
+                                            <div style="width:${c.progress}%; background:var(--brand-primary); height:100%; transition: width 0.3s;"></div>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-secondary); margin-bottom:15px;">
+                                            <span>${c.progress}% Complete</span>
+                                            <span>${c.modules} Modules</span>
+                                        </div>
+                                        <div style="display:flex; gap:10px;">
+                                            <button class="btn btn-secondary" style="flex:1;" onclick="App.viewCourseDetails(${c.id})">Details</button>
+                                            <button class="btn btn-primary" style="flex:1;" onclick="App.updateCourseProgress(${c.id})">
+                                                ${c.progress >= 100 ? 'Review' : 'Continue'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>`;
+
+                    case 'daily-goals':
+                        return `
+                            <div class="card stagger-item">
+                                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                                    <input type="text" id="new-goal-input" class="form-input" placeholder="New goal..." style="margin-bottom:0;">
+                                    <button class="btn btn-primary" onclick="App.addGoal()">Add</button>
+                                </div>
+                                <ul style="list-style:none;">
+                                    ${goals.map((g, idx) => `
+                                        <li style="display:flex; align-items:center; gap:12px; padding:12px; border-bottom:1px solid var(--border-color);">
+                                            <input type="checkbox" ${g.completed ? 'checked' : ''} onchange="App.toggleGoal(${idx})" style="width:18px; height:18px; accent-color:var(--brand-primary);">
+                                            <span style="${g.completed ? 'text-decoration:line-through; opacity:0.5;' : ''}">${g.text}</span>
+                                            <button onclick="App.deleteGoal(${idx})" style="margin-left:auto; color:var(--color-error); background:none; border:none; cursor:pointer; font-weight:bold;">&times;</button>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>`;
+
+                    case 'my-timesheets':
+                        return `
+                            <div class="card stagger-item">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                                    <h3>Weekly Log</h3>
+                                    <button class="btn btn-primary" onclick="App.openTimeModal()">+ Log Time</button>
+                                </div>
+                                <table style="width:100%; text-align:left;">
+                                    <tr style="border-bottom:1px solid var(--border-color); color:var(--text-secondary);">
+                                        <th style="padding:10px;">Date</th><th style="padding:10px;">Task</th><th style="padding:10px;">Hours</th>
+                                    </tr>
+                                    ${timesheets.map(t => `
+                                        <tr style="border-bottom:1px solid var(--border-color);">
+                                            <td style="padding:10px;">${t.date}</td>
+                                            <td style="padding:10px;">${t.task}</td>
+                                            <td style="padding:10px;"><strong>${t.hours}h</strong></td>
+                                        </tr>
+                                    `).join('')}
+                                </table>
+                            </div>`;
+
+                    case 'my-profile':
+                        return `
+                            <div class="card stagger-item" style="max-width:600px; margin:0 auto;">
+                                <h3>Edit Profile</h3>
+                                <form onsubmit="event.preventDefault(); App.saveProfile();">
+                                    <div class="form-group"><label class="form-label">Name</label><input type="text" id="prof-name" class="form-input" value="${user.name}"></div>
+                                    <div class="form-group"><label class="form-label">Role</label><input type="text" id="prof-role" class="form-input" value="${user.role}"></div>
+                                    <div style="text-align:right;"><button class="btn btn-primary">Save Changes</button></div>
+                                </form>
+                            </div>`;
+                    
+                    default: return `<div class="card">Page Under Construction</div>`;
+                }
+            },
+
+            // --- 4. ACTION FUNCTIONS (CRUD) ---
+            
+            // ACHIEVEMENTS
+            openAddAchievementModal() {
+                this.openModal(`
+                    <h3>Add Achievement</h3>
+                    <input id="ach-title" class="form-input" placeholder="Title" style="margin-top:15px;">
+                    <input type="date" id="ach-date" class="form-input">
+                    <textarea id="ach-desc" class="form-input" placeholder="Description" rows="3"></textarea>
+                    <button class="btn btn-primary" onclick="App.addAchievement()">Save</button>
+                `);
+            },
+            addAchievement() {
+                const title = document.getElementById('ach-title').value;
+                const date = document.getElementById('ach-date').value;
+                const description = document.getElementById('ach-desc').value;
+                
+                if(!title || !date) return this.showToast('Fill all fields', 'warning');
+                
+                this.state.achievements.unshift({ id: Date.now(), title, date, description });
+                this.saveData();
+                this.closeModal();
+                this.showToast('Achievement Added!', 'success');
+            },
+            deleteAchievement(id) {
+                if(confirm('Remove this achievement?')) {
+                    this.state.achievements = this.state.achievements.filter(a => a.id !== id);
+                    this.saveData();
+                    this.showToast('Achievement Removed', 'success');
+                }
+            },
+
+            // INTERVIEWS
+            openAddInterviewModal() {
+                this.openModal(`
+                    <h3>Schedule Interview</h3>
+                    <input id="int-company" class="form-input" placeholder="Company Name" style="margin-top:15px;">
+                    <input id="int-role" class="form-input" placeholder="Role">
+                    <input type="date" id="int-date" class="form-input">
+                    <button class="btn btn-primary" onclick="App.addInterview()">Schedule</button>
+                `);
+            },
+            addInterview() {
+                const company = document.getElementById('int-company').value;
+                const role = document.getElementById('int-role').value;
+                const date = document.getElementById('int-date').value;
+                
+                if(!company || !date) return this.showToast('Fill all fields', 'warning');
+                
+                this.state.interviews.unshift({ id: Date.now(), company, role, date, status: 'Scheduled' });
+                this.saveData();
+                this.closeModal();
+                this.showToast('Interview Scheduled!', 'success');
+            },
+
+            // COURSES
+            viewCourseDetails(id) {
+                const course = this.state.courses.find(c => c.id === id);
+                if(!course) return;
+                this.openModal(`
+                    <h3>${course.title}</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:15px;">Instructor: ${course.instructor}</p>
+                    <div style="margin-bottom:15px;">
+                        <strong>Topics Covered:</strong>
+                        <ul style="list-style:disc; padding-left:20px; margin-top:5px; color:var(--text-secondary);">
+                            ${course.topics.map(t => `<li>${t}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="background:var(--bg-body); padding:10px; border-radius:8px;">
+                        <strong>Current Progress:</strong> ${course.progress}%
+                    </div>
+                `);
+            },
+
+            updateCourseProgress(id) {
+                const course = this.state.courses.find(c => c.id === id);
+                if(course.progress >= 100) return this.showToast("Course already completed!", "success");
+                
+                course.progress = Math.min(course.progress + 10, 100);
+                this.saveData();
+                this.showToast(`Progress updated to ${course.progress}%`, "success");
+            },
+
+            // PROJECTS
+            openAddProjectModal() {
+                this.openModal(`
+                    <h3>Add New Project</h3>
+                    <input id="new-proj-name" class="form-input" placeholder="Project Name" style="margin-top:10px;">
+                    <input id="new-proj-stack" class="form-input" placeholder="Tech Stack (e.g. React)">
+                    <button class="btn btn-primary" onclick="App.createProject()">Create Project</button>
+                `);
+            },
+            createProject() {
+                const name = document.getElementById('new-proj-name').value;
+                const stack = document.getElementById('new-proj-stack').value;
+                if(!name || !stack) return this.showToast('Fill all fields', 'warning');
+                
+                this.state.projects.push({ id: Date.now(), name, stack, status: 'Active' });
+                this.saveData();
+                this.closeModal();
+                this.showToast('Project Added!', 'success');
+            },
+            deleteProject(id) {
+                if(confirm('Are you sure you want to delete this project?')) {
+                    this.state.projects = this.state.projects.filter(p => p.id !== id);
+                    this.saveData();
+                    this.showToast('Project Deleted', 'success');
+                }
+            },
+
+            // GOALS
+            addGoal() {
+                const input = document.getElementById('new-goal-input');
+                if(!input.value) return;
+                this.state.goals.push({ id: Date.now(), text: input.value, completed: false });
+                this.saveData();
+                this.showToast('Goal Added', 'success');
+            },
+            toggleGoal(idx) {
+                this.state.goals[idx].completed = !this.state.goals[idx].completed;
+                this.saveData();
+            },
+            deleteGoal(idx) {
+                this.state.goals.splice(idx, 1);
+                this.saveData();
+            },
+
+            // TIMESHEETS
+            openTimeModal() {
+                this.openModal(`
+                    <h3>Log Time</h3>
+                    <input type="date" id="ts-date" class="form-input" style="margin-top:10px;">
+                    <input type="text" id="ts-task" class="form-input" placeholder="Task Description">
+                    <input type="number" id="ts-hours" class="form-input" placeholder="Hours">
+                    <button class="btn btn-primary" onclick="App.addTimeEntry()">Save Entry</button>
+                `);
+            },
+            addTimeEntry() {
+                const date = document.getElementById('ts-date').value;
+                const task = document.getElementById('ts-task').value;
+                const hours = document.getElementById('ts-hours').value;
+                if(!date || !task || !hours) return this.showToast('Fill all fields', 'warning');
+
+                this.state.timesheets.unshift({ id: Date.now(), date, task, hours });
+                this.saveData();
+                this.closeModal();
+                this.showToast('Time Logged!', 'success');
+            },
+
+            // PROFILE
+            saveProfile() {
+                const name = document.getElementById('prof-name').value;
+                const role = document.getElementById('prof-role').value;
+                this.state.user.name = name;
+                this.state.user.role = role;
+                localStorage.setItem('ios_user', JSON.stringify(this.state.user));
+                
+                document.getElementById('sidebar-name').textContent = name;
+                this.showToast('Profile Updated!', 'success');
+            },
+
+            // --- 5. NAVIGATION & UTILS ---
+            navigate(page) {
+                this.state.currentPage = page;
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const link = document.querySelector(`.nav-item[data-link="${page}"]`);
+                if(link) link.classList.add('active');
+                
+                if(window.innerWidth < 1024) document.getElementById('sidebar').classList.remove('open');
+
+                const content = document.getElementById('content-area');
+                const titles = { 'dashboard': 'Overview', 'my-projects': 'Projects', 'daily-goals': 'Goals', 'my-profile': 'Profile', 'my-timesheets': 'Time Logs', 'my-courses': 'Learning Path', 'my-interviews': 'Interviews', 'announcements': 'Notices', 'achievements': 'Achievements' };
+                document.getElementById('page-title').textContent = titles[page] || 'Dashboard';
+                
+                content.innerHTML = this.renderViews(page);
+            },
+
+            checkAuth() {
+                const authView = document.getElementById('auth-view');
+                const appLayout = document.getElementById('app-layout');
+                if (this.state.user) {
+                    authView.classList.add('hidden');
+                    appLayout.classList.remove('hidden');
+                    document.getElementById('sidebar-name').textContent = this.state.user.name;
+                    document.getElementById('sidebar-avatar').textContent = this.state.user.name.charAt(0);
+                    this.navigate('dashboard');
+                    this.checkNotifications();
+                } else {
+                    authView.classList.remove('hidden');
+                    appLayout.classList.add('hidden');
+                }
+            },
+
+            checkNotifications() {
+                // Task Alert
+                const pending = this.state.goals.filter(g => !g.completed).length;
+                if(pending > 0) setTimeout(() => this.showToast(`🔔 Reminder: ${pending} pending tasks!`, 'warning'), 1500);
+
+                // Interview Alert
+                const upcomingInterviews = this.state.interviews.filter(i => i.status === 'Scheduled').length;
+                if(upcomingInterviews > 0) {
+                    setTimeout(() => this.showToast(`📅 Date Pending Alert: ${upcomingInterviews} upcoming interviews!`, 'info'), 2500);
+                }
+            },
+
+            login(e) {
+                e.preventDefault();
+                setTimeout(() => {
+                    this.state.user = { name: 'John Doe', role: 'Intern' };
+                    localStorage.setItem('ios_user', JSON.stringify(this.state.user));
+                    this.checkAuth();
+                }, 800);
+            },
+
+            logout() {
+                localStorage.removeItem('ios_user');
+                location.reload();
+            },
+
+            showToast(msg, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                if(type === 'warning') toast.style.borderLeftColor = 'var(--color-warning)';
+                if(type === 'info') toast.style.borderLeftColor = 'var(--color-info)';
+                toast.innerHTML = `<span style="font-size:1.2rem; margin-right:10px;">${type === 'success' ? '✅' : 'ℹ️'}</span><span>${msg}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+            },
+
+            openModal(html) {
+                const overlay = document.getElementById('modal-overlay');
+                const content = document.getElementById('modal-content');
+                content.innerHTML = `<div style="text-align:right; margin-bottom:10px; cursor:pointer;" onclick="App.closeModal()">&times;</div>${html}`;
+                overlay.classList.add('active');
+            },
+            
+            closeModal() {
+                document.getElementById('modal-overlay').classList.remove('active');
+            },
+
+            applyTheme() {
+                document.documentElement.setAttribute('data-theme', this.state.theme);
+                document.getElementById('theme-btn').innerHTML = this.state.theme === 'light' ? this.icons.moon : this.icons.sun;
+            },
+            
+            toggleTheme() {
+                this.state.theme = this.state.theme === 'light' ? 'dark' : 'light';
+                localStorage.setItem('ios_theme', this.state.theme);
+                this.applyTheme();
+            },
+
+            bindEvents() {
+                document.getElementById('login-form').addEventListener('submit', (e) => this.login(e));
+                document.getElementById('logout-btn').addEventListener('click', () => this.logout());
+                document.getElementById('theme-btn').addEventListener('click', () => this.toggleTheme());
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.onclick = () => this.navigate(item.dataset.link);
+                });
+                document.getElementById('menu-toggle').onclick = () => document.getElementById('sidebar').classList.add('open');
+                document.getElementById('sidebar-close').onclick = () => document.getElementById('sidebar').classList.remove('open');
+                const overlay = document.getElementById('modal-overlay');
+                overlay.onclick = (e) => { if(e.target === overlay) overlay.classList.remove('active'); };
+            }
+        };
+
+        window.App = App;
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>
